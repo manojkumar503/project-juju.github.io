@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ESP32 IoT Monitor</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Arial, sans-serif;
+      background: #eef3f8;
+      color: #172033;
+    }
+
+    main {
+      max-width: 850px;
+      margin: auto;
+    }
+
+    h1 { margin-bottom: 6px; }
+    .subtitle { color: #5b6678; }
+
+    .status {
+      margin: 20px 0;
+      padding: 12px;
+      background: white;
+      border-radius: 10px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: white;
+      padding: 24px;
+      border-radius: 14px;
+      box-shadow: 0 3px 12px #0000000d;
+    }
+
+    .label { color: #596579; }
+    .value {
+      font-size: 38px;
+      font-weight: bold;
+      margin: 14px 0;
+    }
+
+    .unit { font-size: 18px; }
+    button {
+      padding: 12px 18px;
+      border: 0;
+      border-radius: 8px;
+      background: #1769e0;
+      color: white;
+      cursor: pointer;
+    }
+
+    footer {
+      margin-top: 22px;
+      color: #596579;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+<main>
+  <h1>ESP32 IoT Monitor</h1>
+  <p class="subtitle">Live temperature and humidity dashboard</p>
+
+  <div class="status" id="status">
+    Connecting to ThingSpeak...
+  </div>
+
+  <section class="cards">
+    <div class="card">
+      <div class="label">Temperature</div>
+      <div class="value">
+        <span id="temperature">--</span>
+        <span class="unit">°C</span>
+      </div>
+      <div>DHT11 sensor</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Relative humidity</div>
+      <div class="value">
+        <span id="humidity">--</span>
+        <span class="unit">%</span>
+      </div>
+      <div>DHT11 sensor</div>
+    </div>
+  </section>
+
+  <p id="updated">Last update: waiting for data</p>
+  <button onclick="loadData()">Refresh now</button>
+
+  <footer>
+    Data source: ThingSpeak | Auto-refresh every 20 seconds
+  </footer>
+</main>
+
+<script>
+  // Replace with your ThingSpeak Channel ID.
+  const CHANNEL_ID = "YOUR_CHANNEL_ID";
+
+  // Leave empty if the ThingSpeak channel is public.
+  // For a private channel, enter its Read API Key here.
+  const READ_API_KEY = "";
+
+  async function loadData() {
+    const status = document.getElementById("status");
+
+    try {
+      let url =
+        `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json`;
+
+      if (READ_API_KEY) {
+        url += `?api_key=${encodeURIComponent(READ_API_KEY)}`;
+      }
+
+      const response = await fetch(url, { cache: "no-store" });
+
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status);
+      }
+
+      const data = await response.json();
+
+      if (data.field1 == null || data.field2 == null) {
+        throw new Error("No sensor readings available yet");
+      }
+
+      document.getElementById("temperature").textContent =
+        Number(data.field1).toFixed(1);
+
+      document.getElementById("humidity").textContent =
+        Number(data.field2).toFixed(1);
+
+      document.getElementById("updated").textContent =
+        "Last cloud update: " +
+        new Date(data.created_at).toLocaleString();
+
+      status.textContent = "Connected — latest cloud readings loaded.";
+    } catch (error) {
+      status.textContent = "Unable to load readings: " + error.message;
+    }
+  }
+
+  loadData();
+  setInterval(loadData, 20000);
+</script>
+</body>
+</html>
