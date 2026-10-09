@@ -1,161 +1,248 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ESP32 IoT Monitor</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    * { box-sizing: border-box; }
+    <title>Measuring Temperature</title>
 
-    body {
-      margin: 0;
-      padding: 24px;
-      font-family: Arial, sans-serif;
-      background: #eef3f8;
-      color: #172033;
-    }
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    main {
-      max-width: 850px;
-      margin: auto;
-    }
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #eef4f8;
+            color: #1e293b;
+        }
 
-    h1 { margin-bottom: 6px; }
-    .subtitle { color: #5b6678; }
+        header {
+            background: #075985;
+            color: white;
+            text-align: center;
+            padding: 25px 15px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
 
-    .status {
-      margin: 20px 0;
-      padding: 12px;
-      background: white;
-      border-radius: 10px;
-    }
+        header h1 {
+            margin: 0 0 10px;
+            font-size: 30px;
+        }
 
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-    }
+        header p {
+            margin: 0;
+            font-size: 15px;
+        }
 
-    .card {
-      background: white;
-      padding: 24px;
-      border-radius: 14px;
-      box-shadow: 0 3px 12px #0000000d;
-    }
+        .container {
+            max-width: 850px;
+            margin: auto;
+        }
 
-    .label { color: #596579; }
-    .value {
-      font-size: 38px;
-      font-weight: bold;
-      margin: 14px 0;
-    }
+        .status {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px #00000010;
+        }
 
-    .unit { font-size: 18px; }
-    button {
-      padding: 12px 18px;
-      border: 0;
-      border-radius: 8px;
-      background: #1769e0;
-      color: white;
-      cursor: pointer;
-    }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fit, minmax(230px, 1fr)
+            );
+            gap: 20px;
+        }
 
-    footer {
-      margin-top: 22px;
-      color: #596579;
-      font-size: 14px;
-    }
-  </style>
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 12px #00000012;
+        }
+
+        .card h2 {
+            font-size: 20px;
+            color: #475569;
+            margin-top: 0;
+        }
+
+        .value {
+            font-size: 45px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .temperature {
+            color: #ea580c;
+        }
+
+        .humidity {
+            color: #0284c7;
+        }
+
+        .unit {
+            font-size: 22px;
+        }
+
+        .icon {
+            font-size: 40px;
+        }
+
+        button {
+            display: block;
+            margin: 25px auto;
+            padding: 13px 25px;
+            border: none;
+            border-radius: 8px;
+            background: #075985;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0c4a6e;
+        }
+
+        #lastUpdate {
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #64748b;
+            font-size: 13px;
+        }
+    </style>
 </head>
 
 <body>
-<main>
-  <h1>ESP32 IoT Monitor</h1>
-  <p class="subtitle">Live temperature and humidity dashboard</p>
 
-  <div class="status" id="status">
-    Connecting to ThingSpeak...
-  </div>
+<div class="container">
 
-  <section class="cards">
-    <div class="card">
-      <div class="label">Temperature</div>
-      <div class="value">
-        <span id="temperature">--</span>
-        <span class="unit">°C</span>
-      </div>
-      <div>DHT11 sensor</div>
+    <header>
+        <h1>🌡️ Measuring Temperature</h1>
+        <p>ESP32 Based IoT Temperature Monitoring System</p>
+    </header>
+
+    <div class="status" id="status">
+        Connecting to sensor cloud...
     </div>
 
-    <div class="card">
-      <div class="label">Relative humidity</div>
-      <div class="value">
-        <span id="humidity">--</span>
-        <span class="unit">%</span>
-      </div>
-      <div>DHT11 sensor</div>
+    <div class="cards">
+
+        <div class="card">
+            <div class="icon">🌡️</div>
+            <h2>Temperature</h2>
+
+            <div class="value temperature">
+                <span id="temperature">--</span>
+                <span class="unit">°C</span>
+            </div>
+
+            <p>Measured using DHT11</p>
+        </div>
+
+        <div class="card">
+            <div class="icon">💧</div>
+            <h2>Humidity</h2>
+
+            <div class="value humidity">
+                <span id="humidity">--</span>
+                <span class="unit">%</span>
+            </div>
+
+            <p>Relative humidity</p>
+        </div>
+
     </div>
-  </section>
 
-  <p id="updated">Last update: waiting for data</p>
-  <button onclick="loadData()">Refresh now</button>
+    <button onclick="loadData()">Refresh Readings</button>
 
-  <footer>
-    Data source: ThingSpeak | Auto-refresh every 20 seconds
-  </footer>
-</main>
+    <p id="lastUpdate">Last update: Waiting for data</p>
+
+    <footer>
+        ESP32 + DHT11 | IoT Monitoring Dashboard
+    </footer>
+
+</div>
 
 <script>
-  // Replace with your ThingSpeak Channel ID.
-  const CHANNEL_ID = "3528650";
+    // Replace with your actual ThingSpeak Channel ID.
+    const CHANNEL_ID = "3528650";
 
-  // Leave empty if the ThingSpeak channel is public.
-  // For a private channel, enter its Read API Key here.
-  const READ_API_KEY = "";
+    // Keep empty when your ThingSpeak channel is public.
+    const READ_API_KEY = "";
 
-  async function loadData() {
-    const status = document.getElementById("status");
+    async function loadData() {
+        const status = document.getElementById("status");
 
-    try {
-      let url =
-        `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json`;
+        status.textContent = "Loading latest sensor readings...";
 
-      if (READ_API_KEY) {
-        url += `?api_key=${encodeURIComponent(READ_API_KEY)}`;
-      }
+        try {
+            let url =
+                `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json`;
 
-      const response = await fetch(url, { cache: "no-store" });
+            if (READ_API_KEY !== "") {
+                url += `?api_key=${encodeURIComponent(READ_API_KEY)}`;
+            }
 
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status);
-      }
+            const response = await fetch(url, {
+                cache: "no-store"
+            });
 
-      const data = await response.json();
+            if (!response.ok) {
+                throw new Error("Cloud request failed: " + response.status);
+            }
 
-      if (data.field1 == null || data.field2 == null) {
-        throw new Error("No sensor readings available yet");
-      }
+            const data = await response.json();
 
-      document.getElementById("temperature").textContent =
-        Number(data.field1).toFixed(1);
+            if (data.field1 == null || data.field2 == null) {
+                throw new Error("No sensor data received yet.");
+            }
 
-      document.getElementById("humidity").textContent =
-        Number(data.field2).toFixed(1);
+            const temperature = Number(data.field1);
+            const humidity = Number(data.field2);
 
-      document.getElementById("updated").textContent =
-        "Last cloud update: " +
-        new Date(data.created_at).toLocaleString();
+            if (!Number.isFinite(temperature) ||
+                !Number.isFinite(humidity)) {
+                throw new Error("Invalid sensor values.");
+            }
 
-      status.textContent = "Connected — latest cloud readings loaded.";
-    } catch (error) {
-      status.textContent = "Unable to load readings: " + error.message;
+            document.getElementById("temperature").textContent =
+                temperature.toFixed(1);
+
+            document.getElementById("humidity").textContent =
+                humidity.toFixed(1);
+
+            document.getElementById("lastUpdate").textContent =
+                "Last cloud update: " +
+                new Date(data.created_at).toLocaleString();
+
+            status.textContent = "Connected | Sensor readings updated";
+
+        } catch (error) {
+            status.textContent = "Unable to load readings: " + error.message;
+        }
     }
-  }
 
-  loadData();
-  setInterval(loadData, 20000);
+    // Load immediately and refresh every 20 seconds.
+    loadData();
+    setInterval(loadData, 20000);
 </script>
+
 </body>
 </html>
+```
